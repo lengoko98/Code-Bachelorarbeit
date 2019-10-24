@@ -1,0 +1,48 @@
+#include <SPI.h>
+#include <SD.h>
+#include <Time.h>
+#include <virtuabotixRTC.h>
+#define SSpin 28//pin für slave select
+
+File dokument; //erstellung Objekt dokument der art file
+
+virtuabotixRTC myRTC(22, 24, 26);
+
+void setup() {
+
+Serial.begin(9600);
+
+//myRTC.setDS1302Time(04, 52, 17, 3, 16, 10, 2019); // Sekunde, Minute, Stunde, Wochentag(1=Montag), Tag, Monat, Jahr //Es muss nur ein Mal kalibriert werden, dann komentieren
+
+SD.begin(SSpin);
+
+}
+
+void loop() {
+  
+myRTC.updateTime();
+
+dokument = SD.open("werte.txt", FILE_WRITE);  // aufmachen von dokument .txt aus der sd, wenn nicht gefundet wird, wird eine erstellt
+
+dokument.print("Uhrzeit: ");
+dokument.print(myRTC.hours);
+dokument.print(":");
+dokument.print(myRTC.minutes);
+dokument.print(":");
+dokument.print(myRTC.seconds);
+dokument.print(" Datum: ");
+dokument.print(myRTC.dayofmonth);
+dokument.print("/");
+dokument.print(myRTC.month);
+dokument.print("/");
+dokument.print(myRTC.year);
+dokument.print(" ");
+dokument.print(", ");
+dokument.print("Temperatur ");
+dokument.print(", ");
+dokument.println("Beschleunigung ");
+dokument.close();
+
+delay(2000);
+
+}

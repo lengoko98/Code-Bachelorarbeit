@@ -1,0 +1,36 @@
+#include <MPU6050.h>
+
+MPU6050 sensor;
+
+int16_t AcX, AcY, AcZ, GyX, GyY, GyZ;
+
+void setup() {
+
+
+Wire.begin();
+
+Serial.begin(9600);
+
+sensor.initialize();
+
+sensor.setFullScaleGyroRange(3);
+sensor.setFullScaleAccelRange(3);
+
+
+Serial.println(sensor.getFullScaleGyroRange());
+Serial.println(sensor.getFullScaleAccelRange());
+
+Serial.println();
+
+}
+
+void loop() {
+
+sensor.getMotion6(&AcX, &AcY, &AcZ, &GyX, &GyY, &GyZ);
+
+  Serial.print("Drehzahl in: X="),Serial.print(GyX/60);
+  Serial.print(", Y="),Serial.print(GyY/60);
+  Serial.print(", Z="),Serial.println(GyZ/60);
+
+  delay(3000);
+}

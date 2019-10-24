@@ -1,0 +1,36 @@
+#include <virtuabotixRTC.h> //Librarie die benutzt wird
+
+virtuabotixRTC myRTC(22, 24, 26); //Definition der Pins (CLK, DAT, RST)
+
+void setup() {
+  
+Serial.begin(9600); //Initialisierung Serial Verbindung
+
+
+//myRTC.setDS1302Time(04, 47, 17, 4, 24, 10, 2019); // Sekunde, Minute, Stunde, Wochentag(1=Montag), Tag, Monat, Jahr //Es muss nur ein Mal kalibriert werden, dann komentieren
+
+}
+
+void loop() {
+
+  myRTC.updateTime(); //Wird nach Uhrzeit und Datum zu der Echtzeit-Uhr gefragt
+
+  
+  Serial.print("Uhrzeit: ");
+  Serial.print(myRTC.hours);
+  Serial.print(":");
+  Serial.print(myRTC.minutes);
+  Serial.print(":");
+  Serial.print(myRTC.seconds);
+  Serial.print(" Datum: ");
+  Serial.print(myRTC.dayofmonth); 
+  Serial.print("/");
+  Serial.print(myRTC.month);
+  Serial.print("/");
+  Serial.print(myRTC.year);
+  Serial.println(" ");
+
+
+  
+  delay(1000); 
+}

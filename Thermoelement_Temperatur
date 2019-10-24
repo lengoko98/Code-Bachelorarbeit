@@ -1,0 +1,25 @@
+#include <Thermocouple.h>
+#include <MAX6675_Thermocouple.h>
+
+#define SCK 30
+#define CS 32
+#define SO 34
+
+Thermocouple* thermocouple;
+
+void setup() {
+  Serial.begin(9600);
+
+  thermocouple = new MAX6675_Thermocouple(SCK, CS, SO);
+}
+
+void loop() {
+  
+double celsius = thermocouple->readCelsius();
+
+Serial.print("Thermoelement Temperatur: ");
+Serial.print(celsius);
+Serial.println("C°");
+
+  delay(2000); 
+}

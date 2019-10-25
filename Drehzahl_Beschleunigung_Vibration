@@ -2,10 +2,11 @@
 
 MPU6050 sensor;
 
+int x = 1000;
+
 int16_t AcX, AcY, AcZ, GyX, GyY, GyZ;
 
 void setup() {
-
 
 Wire.begin();
 
@@ -28,9 +29,18 @@ void loop() {
 
 sensor.getMotion6(&AcX, &AcY, &AcZ, &GyX, &GyY, &GyZ);
 
-  Serial.print("Drehzahl in: X="),Serial.print(GyX/60);
-  Serial.print(", Y="),Serial.print(GyY/60);
-  Serial.print(", Z="),Serial.println(GyZ/60);
+//Serial.print("Drehzahl in: X="),Serial.print(GyX/60);
+//Serial.print(", Y="),Serial.print(GyY/60);
 
-  delay(3000);
+int GyZ1= GyZ;
+delay(x);
+
+sensor.getMotion6(&AcX, &AcY, &AcZ, &GyX, &GyY, &GyZ);
+int GyZ2= GyZ;
+
+Serial.print("Winkelbeschleunigung in Z= "),Serial.print(((GyZ2-GyZ1)/(x*0,001))*(M_PI/180)),Serial.println(" rad·s−2");
+
+Serial.print("Drehzahl in Z= "),Serial.print(GyZ/60),Serial.println(" U/min");
+
+  delay(2000);
 }

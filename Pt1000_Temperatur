@@ -1,0 +1,23 @@
+float Alpha = 0.00385;
+float R = 1500;
+float R0 = 1000;
+
+void setup() {
+
+  Serial.begin(9600);
+
+}
+
+void loop() {
+
+  float x = analogRead(A0);
+
+  float Pt1000  = (R * x) / (1023 - x);
+
+  float Temperatur = ((Pt1000 / R0) - 1) / Alpha;
+
+  Serial.print("Pt1000 Temperatur: "), Serial.println(Temperatur);
+
+  delay(1000);
+
+}

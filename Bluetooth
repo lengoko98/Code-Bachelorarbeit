@@ -1,0 +1,108 @@
+#define HC10 Serial3
+#include <math.h>
+
+#include <virtuabotixRTC.h>
+virtuabotixRTC myRTC(22, 24, 26);
+
+#include <MPU6050.h>
+MPU6050 sensor;
+int x = 100;
+int16_t AcX, AcY, AcZ, GyX, GyY, GyZ;
+
+float Alpha = 0.00385;
+float R = 1500;
+float R0 = 1000;
+
+#include <M2M_LM75A.h>
+M2M_LM75A lm75a;
+
+
+#include <Thermocouple.h>
+#include <MAX6675_Thermocouple.h>
+#define SCK 30
+#define CS 32
+#define SO 34
+Thermocouple* thermocouple;
+
+
+void setup()
+{
+  Serial.begin(9600);
+
+  HC10.begin(9600);
+
+  //myRTC.setDS1302Time(04, 47, 18, 7, 27, 10, 2019);
+
+  Wire.begin();
+  sensor.initialize();
+  sensor.setFullScaleGyroRange(3);
+  sensor.setFullScaleAccelRange(3);
+
+
+  lm75a.begin();
+
+  thermocouple = new MAX6675_Thermocouple(SCK, CS, SO);
+
+}
+
+void loop()
+{
+
+  myRTC.updateTime();
+
+  float x = analogRead(A0);
+  float Pt1000  = (R * x) / (1023 - x);
+  float Temperatur = ((Pt1000 / R0) - 1) / Alpha;
+
+  float lm75 = lm75a.getTemperature();
+
+  float thermoelement = thermocouple->readCelsius();
+
+  sensor.getMotion6(&AcX, &AcY, &AcZ, &GyX, &GyY, &GyZ);
+  float GyZ1 = GyZ;
+  delay(x);
+  sensor.getMotion6(&AcX, &AcY, &AcZ, &GyX, &GyY, &GyZ);
+  float GyZ2 = GyZ;
+  float winkelbeschleunigung = ((GyZ2 - GyZ1) / (x * 0, 001)) * (M_PI / 180);
+  float drehzahl = GyZ / 60;
+
+  char cstunde[10];
+  char cminute[10];
+  char csekunde[10];
+  char ctag[10];
+  char cmonat[10];
+  char cjahr[10];
+  char cpt1000[10];
+  char clm75[10];
+  char cthermoelement[10];
+  char cwinkelbeschleunigung[10];
+  char cdrehzahl[10];
+
+  sprintf(cstunde, "%u", myRTC.hours);
+  sprintf(cminute, "%u", myRTC.minutes);
+  sprintf(csekunde, "%u", myRTC.seconds);
+  sprintf(ctag, "%u", myRTC.dayofmonth);
+  sprintf(cmonat, "%u", myRTC.month);
+  sprintf(cjahr, "%u", myRTC.year);
+  sprintf(cpt1000, "%0.2f", Temperatur);
+  sprintf(clm75, "%0.2f", lm75);
+  sprintf(cthermoelement, "%0.2f", thermoelement);
+  sprintf(cwinkelbeschleunigung, "%0.2f", winkelbeschleunigung);
+  sprintf(cdrehzahl, "%0.2f", drehzahl);
+
+
+  HC10.write ("Uhrzeit: "), HC10.write(cstunde), HC10.write(":"), HC10.write(cminute), HC10.write(":"), HC10.write(csekunde), HC10.write(" Datum "), HC10.write(ctag), HC10.write("/"), HC10.write(cmonat), HC10.write("/"), HC10.write(cjahr), HC10.write("\n");
+  HC10.write("Pt1000 Temperatur: "), HC10.write(cpt1000), HC10.write(" °C"), HC10.write("\n");
+  HC10.write("LM75 Temperatur: "), HC10.write(clm75), HC10.write(" °C"), HC10.write("\n");
+  HC10.write("Thermoelement Temperatur: "), HC10.write(cthermoelement), HC10.write(" °C"), HC10.write("\n");
+  HC10.write("Winkelbeschleunigung in Z= "), HC10.write(cwinkelbeschleunigung), HC10.write(" rad·s−2"), HC10.write("\n");
+  HC10.write("Drehzahl in Z= "), HC10.write(cdrehzahl), HC10.write(" U/min"), HC10.write("\n");
+  HC10.write("\n");
+
+
+  delay(2000);
+
+
+
+
+}

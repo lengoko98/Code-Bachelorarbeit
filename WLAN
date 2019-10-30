@@ -1,0 +1,70 @@
+#include <ESP8266WiFi.h>
+#include <PubSubClient.h>
+
+double lm75_temperature = 0, thermoelement_temperature = 0;
+
+const char* ssid = "UPCEB19177"; //UPCEB19177
+const char* password = "Cyxwyksjm3z2"; //Cyxwyksjm3z2
+
+const char* mqtt_server = "192.168.0.185";
+
+WiFiClient espClient;
+PubSubClient client(espClient);
+
+
+// Timers auxiliar variables
+long now = millis();
+long lastMeasure = 0;
+
+// Don't change the function below. This functions connects your ESP8266 to your router
+void setup_wifi() {
+  delay(10);
+
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+
+  }
+}
+
+
+void setup() {
+
+  setup_wifi();
+
+  client.setServer(mqtt_server, 1883);
+
+}
+
+void measureTemperature()
+{
+  lm75_temperature += 0.1;
+  thermoelement_temperature += 0.05;
+
+  if (lm75_temperature > 10) lm75_temperature = 0;
+  if (thermoelement_temperature > 10) thermoelement_temperature = 0;
+}
+
+void publishResults()
+{
+  client.publish("temperatur/lm75", String(lm75_temperature).c_str());
+  client.publish("temperatur/thermoelement", String(thermoelement_temperature).c_str());
+}
+
+void loop() {
+
+  if (!client.loop())
+
+    client.connect("ESP8266Client");
+
+  now = millis();
+  // Publishes new temperature and humidity every 30 seconds
+  if (now - lastMeasure > 300) {
+    lastMeasure = now;
+
+    measureTemperature();
+
+    publishResults();
+
+  }
+}

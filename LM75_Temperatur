@@ -1,3 +1,4 @@
+
 #include <M2M_LM75A.h>
 
 M2M_LM75A lm75a;
@@ -14,9 +15,9 @@ void setup()
 void loop()
 {
 
-  Serial.print("LM75 Temperature: ");
-  Serial.print(lm75a.getTemperature()); 
-  Serial.println("°C");
+
+double lm75=lm75a.getTemperature(); 
+ Serial.print("LM75 Temperatur: "),Serial.print(lm75),Serial.println("°C");
 
 delay (2000);
 }

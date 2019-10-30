@@ -1,0 +1,71 @@
+#include <virtuabotixRTC.h>
+virtuabotixRTC myRTC(22, 24, 26);
+
+#include <MPU6050.h>
+MPU6050 sensor;
+int x = 100;
+int16_t AcX, AcY, AcZ, GyX, GyY, GyZ;
+
+float Alpha = 0.00385;
+float R = 1500;
+float R0 = 1000;
+
+#include <M2M_LM75A.h>
+M2M_LM75A lm75a;
+
+#include <Thermocouple.h>
+#include <MAX6675_Thermocouple.h>
+#define SCK 30
+#define CS 32
+#define SO 34
+Thermocouple* thermocouple;
+
+void setup() {
+
+  Serial.begin(9600);
+
+  //myRTC.setDS1302Time(04, 47, 18, 7, 27, 10, 2019);
+
+  Wire.begin();
+  sensor.initialize();
+  sensor.setFullScaleGyroRange(3);
+  sensor.setFullScaleAccelRange(3);
+
+
+  lm75a.begin();
+
+  thermocouple = new MAX6675_Thermocouple(SCK, CS, SO);
+
+
+
+
+}
+
+void loop()
+{
+  Serial.println();
+
+  myRTC.updateTime();
+  Serial.print("Uhrzeit: "), Serial.print(myRTC.hours), Serial.print(":"), Serial.print(myRTC.minutes), Serial.print(":"), Serial.print(myRTC.seconds), Serial.print(" Datum: "), Serial.print(myRTC.dayofmonth), Serial.print("/"), Serial.print(myRTC.month), Serial.print("/"), Serial.println(myRTC.year);
+
+  float x = analogRead(A0);
+  float Pt1000  = (R * x) / (1023 - x);
+  float Temperatur = ((Pt1000 / R0) - 1) / Alpha;
+  Serial.print("Pt1000 Temperatur: "), Serial.println(Temperatur);
+
+  double lm75 = lm75a.getTemperature();
+  Serial.print("LM75 Temperatur: "), Serial.print(lm75), Serial.println("°C");
+
+  double thermoelement = thermocouple->readCelsius();
+  Serial.print("Thermoelement Temperatur: "), Serial.print(thermoelement), Serial.println("°C");
+
+  sensor.getMotion6(&AcX, &AcY, &AcZ, &GyX, &GyY, &GyZ);
+  int GyZ1 = GyZ;
+  delay(x);
+  sensor.getMotion6(&AcX, &AcY, &AcZ, &GyX, &GyY, &GyZ);
+  int GyZ2 = GyZ;
+  Serial.print("Winkelbeschleunigung in Z= "), Serial.print(((GyZ2 - GyZ1) / (x * 0, 001)) * (M_PI / 180)), Serial.print(" rad·s−2"), Serial.print("   Drehzahl in Z= "), Serial.print(GyZ / 60), Serial.println(" U/min");
+
+
+  delay (2000);
+}
